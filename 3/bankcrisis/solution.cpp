@@ -3,92 +3,93 @@
 #include <algorithm>
 #include <string>
 #include <iterator>
+#include <utility>
+#include <map>
+
+struct Entry {
+	Entry(size_t value, Entry * parent) : value(value), parent(parent) {}
+	size_t value;
+	Entry * parent;
+	inline bool is_root() {
+		return this == parent;
+	}
+	Entry * get_representative() {
+		if (this->is_root()) {
+			return this;
+		}
+		return this->parent = this->parent->get_representative();
+	}
+	inline bool is_in_same_set(Entry * e) {
+		return this->get_representative() == e->get_representative();
+	}
+};
+
+using connection = std::pair<size_t, size_t>;
 
 int main (void) {
 	std::ios::sync_with_stdio(false);
 	int total_number;
-	int iterations = 0;
 	std::cin >> total_number;
-	std::string line;
-	while (++iterations <= total_number && std::cin >> line) {
-		const size_t length = line.length();
-		if (length < 2) {
-			std::cout << -1 << std::endl;
-			continue;
-		}
+	if (total_number <= 0) {
+		return 0;
+	}
+	size_t first, second;
+	std::vector<connection> graph(total_number);
+	auto itr = graph.begin();
+	auto itr_end = graph.end(); 
+	while(itr != itr_end) {
+		std::cin >> first >> second;
+		*itr = std::make_pair(first, second);
+		++itr;
+	}
 
-		const bool odd = length & 1;
+	std::map<size_t, Entry*> sets;
 
-		const auto line_begin = line.begin();
-		const auto line_end = line.end();
-		const auto before_end = line_end - 1;
-
-		size_t counter = 0;
-		bool current_single_middle = odd;
-		bool current_up = true;
-		bool current_single_middle_up = current_single_middle;
-		bool current_single_middle_down = !current_single_middle;
-		auto up_itr = line_begin + length / 2;
-		auto down_itr = up_itr - 1;
-
-		auto tmp_up_itr = up_itr;
-		auto tmp_down_itr = down_itr;
-
-
-		size_t tmp_loop_counter = 0;
-		while (up_itr != line_end) {
-			size_t tmp_counter = 1;
-			current_up = !current_up;
-			if (tmp_loop_counter + counter >= length) {
-				break;
-			}
-			if (current_up == odd) { 
-				++tmp_loop_counter;
-			}
-			if (!current_up) {
-				current_single_middle_up = !current_single_middle_up;
-				if (!current_single_middle_up) {
-					tmp_down_itr = up_itr;
-					tmp_up_itr = up_itr;
-					++up_itr;
-				} else {
-					tmp_down_itr = up_itr - 1;
-					tmp_up_itr = up_itr;
-					if (*tmp_down_itr == *tmp_up_itr) {
-						tmp_counter = 2;
-					} else {
-						continue;
-					}
-				}
-			} else {
-				current_single_middle_down = !current_single_middle_down;
-				if (!current_single_middle_down) {
-					tmp_down_itr = down_itr;
-					tmp_up_itr = down_itr;
-					--down_itr;
-				} else {
-					tmp_down_itr = down_itr;
-					tmp_up_itr = down_itr + 1;
-					if (*tmp_down_itr == *tmp_up_itr) {
-						tmp_counter = 2;
-					} else {
-						continue;
-					}
-				}
-			}
-
-			while (tmp_down_itr != line_begin && tmp_up_itr != before_end && *--tmp_down_itr == *++tmp_up_itr) {
-				tmp_counter += 2;
-			}
-			if (tmp_counter > counter) {
-				counter = tmp_counter;
-			}
-		}
-		if (counter > 1) {
-			std::cout << counter << std::endl;
+	for (auto & conn : graph) {
+		auto find_first = sets.find(conn.first);
+		auto find_second = sets.find(conn.second);
+		auto sets_end = sets.end();
+		if (find_first == sets_end && find_second == sets_end) {
+			auto entry_ptr = new Entry(conn.first, nullptr);
+			entry_ptr->parent = entry_ptr;
+			sets[conn.first] = entry_ptr;
+			sets[conn.second] = new Entry(conn.second, entry_ptr);
+		} else if (find_first == sets_end) {
+			sets[conn.first] = new Entry(conn.first, find_second->second);
+		} else if (find_second == sets_end) {
+			sets[conn.second] = new Entry(conn.second, find_first->second);
 		} else {
-			std::cout << -1 << std::endl;
+			if (!find_first->second->is_in_same_set(find_second->second)) {
+				find_second->second->parent->parent = find_first->second;
+			}
 		}
+	}
+
+	std::map<size_t, std::vector<size_t>> result;
+
+	for (auto & e : sets) {
+		size_t value = e.second->get_representative()->value;
+		auto res_find = result.find(value);
+		if (res_find == result.end()) {
+			result[value] = {e.first};
+		} else {
+			result[value].push_back(e.first);
+		}
+	}
+
+	std::vector<std::vector<size_t>> final_result(result.size());
+	auto res_itr = final_result.begin();
+	for (auto & r : result) {
+		*res_itr = r.second;
+		std::sort(res_itr->begin(), res_itr->end());
+		++res_itr;
+	}
+	std::sort(final_result.begin(), final_result.end(), [](std::vector<size_t> & a, std::vector<size_t> & b) {
+		return a[0] < b[0];
+	});
+	for (auto & r : final_result) {
+		std::copy(r.begin(), --r.end(), std::ostream_iterator<size_t>(std::cout, ", "));
+		std::cout << *--r.end() << std::endl;
 	}
 
 	return 0;
