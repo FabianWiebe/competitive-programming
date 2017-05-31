@@ -33,10 +33,13 @@ struct Entry {
 		if (this->is_in_same_set(e)) {
 			return false;
 		}
-		if (e->nodes > this->nodes) {
+		// parent = get_representative()
+		if (e->parent->nodes > this->parent->nodes) {
+			e->parent->nodes += this->parent->nodes;
 			this->parent->is_root = false;
 			this->parent->parent = e->parent;
 		} else {
+			this->parent->nodes += e->parent->nodes;
 			e->parent->is_root = false;
 			e->parent->parent = this->parent;
 		}
@@ -58,6 +61,7 @@ struct Edge
 
 int main (void) {
 	std::ios::sync_with_stdio(false);
+	std::cin.tie(NULL);
 	int total_number;
 	std::cin >> total_number;
 	int vertices_no, edges_no;
@@ -94,7 +98,7 @@ int main (void) {
 				sum += edge.weight;
 			}
 		}
-		std::cout << sum << std::endl;
+		std::cout << sum << '\n';
 
 		for (auto & v : graph) {
 			delete v;

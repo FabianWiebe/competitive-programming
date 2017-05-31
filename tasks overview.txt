@@ -1,0 +1,18 @@
+0
+- demo: simple summing
+1
+- word_count: word counting
+2
+- expansion: count most occurence
+- palindrome: search from middle
+3
+- bankcrisis: union find
+- election: sort after linear time
+4
+- exploration: partial order, take away nodes with no inputs
+- ipomc: inverse mst
+- jerusalem trip: next free
+5
+- assignments: binary search
+- punctuality: sssp single-source shortest path, positive weigts - Dijkstra 
+- timetravel: apsp All-Pairs Shortest Paths, negative weights - Floyd-Warshall
