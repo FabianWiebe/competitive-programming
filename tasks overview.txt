@@ -16,3 +16,17 @@
 - assignments: binary search
 - punctuality: sssp single-source shortest path, positive weigts - Dijkstra 
 - timetravel: apsp All-Pairs Shortest Paths, negative weights - Floyd-Warshall
+
+7
+- Blackout: dynamische Programmierung, beste Aufteilung für Preis
+- IOPMC: Graphentraversierung, längster Pfad
+- Mining: doppelt verkette Liste, rekursiv
+
+8
+- Garden: Berechnung aller kürzester Pfade
+- pokerchips: rekursiv mit dyn prog
+- students: 
+
+9
+- atlas: dyn prog
+- destructive art: not working

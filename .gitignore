@@ -1,3 +1,4 @@
 solution
 .idea/
 cmake-build-debug/
+out.txt
