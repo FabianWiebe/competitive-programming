@@ -15,39 +15,8 @@ struct Slot {
     size_t server_id;
     size_t start;
     size_t end;
-//    bool operator<(const Slot& rhs) const
-//    {
-//      if (first == rhs.first) {
-//        return second < rhs.second;
-//      }
-//      return first < rhs.first;
-//    }
 };
 using Pair = pair<int, int>;
-//struct Pair {
-//    size_t first;
-//    size_t second;
-//    bool operator<(const Pair& rhs) const
-//    {
-//      if (first == rhs.first) {
-//        return second < rhs.second;
-//      }
-//      return first < rhs.first;
-//    }
-//    bool operator==(const Pair &other) const
-//    { return first == other.first
-//              && second == other.second;
-//    }
-//};
-//struct cmpStruct {
-//    bool operator() (Pair const & lhs,  Pair const & rhs) const
-//    {
-//      if (lhs.first == rhs.first) {
-//        return lhs.second < rhs.second;
-//      }
-//      return lhs.first < rhs.first;
-//    }
-//};
 
 
 int main (void) {
@@ -86,7 +55,11 @@ int main (void) {
     int current_time = 0;
     auto my_comp =
             [](const my_pair_t& e1, const my_pair_t& e2)
-            { return e1.second > e2.second; };
+            {
+                if (e1.second == e2.second) {
+                  return e1.first > e2.first;
+                }
+                return e1.second > e2.second; };
     priority_queue<my_pair_t,
             my_container_t,
             decltype(my_comp)> queue(my_comp);
@@ -94,23 +67,25 @@ int main (void) {
     int first = -1;
     int last = -1;
     int runner = first;
-    int last_time = -1;
 
     vector<size_t> updated;
     for (auto & s : slots) {
       if (s.start > current_time) {
-//        if (s.start >= 604796) {
-//          cout << "wrong" << endl;
-//        }
-        while (!queue.empty() && queue.top().second < s.start) {
-          last_time = queue.top().second;
-          runner = first;
-
-          while (runner != last) {
-            unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
-            result.insert(value);
-            runner = current[runner].second;
+        for (auto & update : updated) {
+            if (current[update].second != -1) {
+              unsigned long value = (static_cast<unsigned long>(update) << 32) + current[update].second;
+              result.insert(value);
+            }
+            if (current[update].first != -1) {
+              unsigned long value = (static_cast<unsigned long>(current[update].first) << 32) + update;
+              result.insert(value);
+            }
           }
+        updated.clear();
+        while (!queue.empty() && queue.top().second < s.start) {
+          int last_time = queue.top().second;
+
+
 
           while (!queue.empty() && queue.top().second == last_time) {
             auto p = queue.top();
@@ -125,19 +100,18 @@ int main (void) {
               first = current[p.first].second;
             } else {
               current[current[p.first].first].second = current[p.first].second;
-
             }
             current[p.first] = Pair(-1, -1);
           }
-        }
-        runner = first;
 
-        while (runner != last) {
-          unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
-          result.insert(value);
-          runner = current[runner].second;
+          runner = first;
+          while (runner != last) {
+            unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
+            result.insert(value);
+            runner = current[runner].second;
+          }
         }
-//        result.insert((slots[i].server_id << 32) +  slots[i+1].server_id);
+
 
         runner = first;
       }
@@ -149,6 +123,8 @@ int main (void) {
         current[s.server_id] = Pair{-1, runner};
         current[runner].first = s.server_id;
         first = runner = s.server_id;
+
+//        updated.push_back(s.server_id);
       } else {
         while (current[runner].second != -1 && current[runner].second < s.server_id) {
           runner = current[runner].second;
@@ -163,22 +139,25 @@ int main (void) {
           current[runner].second = s.server_id;
         }
         runner = s.server_id;
-      }
-      // updated.push_back(server_id);
-    }
-    while (!queue.empty()) {
-      last_time = queue.top().second;
-      runner = first;
 
-      while (runner != last) {
-        size_t next = current[runner].second;
-        if (runner == 299 && next == 305) {
-          cout << "wrong" << endl;
-        }
-        unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
-        result.insert(value);
-        runner = current[runner].second;
       }
+      updated.push_back(s.server_id);
+    }
+
+    for (auto & update : updated) {
+      if (current[update].second != -1) {
+        unsigned long value = (static_cast<unsigned long>(update) << 32) + current[update].second;
+        result.insert(value);
+      }
+      if (current[update].first != -1) {
+        unsigned long value = (static_cast<unsigned long>(current[update].first) << 32) + update;
+        result.insert(value);
+      }
+    }
+    updated.clear();
+
+    while (!queue.empty()) {
+      int last_time = queue.top().second;
 
       while (!queue.empty() && queue.top().second == last_time) {
         auto p = queue.top();
@@ -193,24 +172,17 @@ int main (void) {
           first = current[p.first].second;
         } else {
           current[current[p.first].first].second = current[p.first].second;
-
         }
-        current[p.first] = Pair(-1, -1);
+//        current[p.first] = Pair(-1, -1);
       }
       runner = first;
 
       while (runner != last) {
-        size_t next = current[runner].second;
-        if (runner == 299 && next == 305) {
-          cout << "wrong" << endl;
-        }
         unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
         result.insert(value);
         runner = current[runner].second;
       }
 //        result.insert((slots[i].server_id << 32) +  slots[i+1].server_id);
-
-      runner = first;
     }
 
     vector<Pair> sorted_result(result.size());
