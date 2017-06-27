@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <queue>
+#include <<cstdlib>>
 
 using namespace std;
 
@@ -85,16 +86,23 @@ int main (void) {
         while (!queue.empty() && queue.top().second < s.start) {
           int last_time = queue.top().second;
 
-
-
           while (!queue.empty() && queue.top().second == last_time) {
             auto p = queue.top();
             queue.pop();
-            //          updated.push_back(p.first);
             if (last == p.first) {
               last = current[p.first].first;
+              if (updated.back() == p.first) {
+                updated.pop_back();
+              }
             } else {
               current[current[p.first].second].first = current[p.first].first;
+              if (first != p.first) {
+                if (updated.back() == p.first) {
+                  updated.back() = current[p.first].second;
+                } else {
+                  updated.push_back(current[p.first].second);
+                }
+              }
             }
             if (first == p.first) {
               first = current[p.first].second;
@@ -104,12 +112,11 @@ int main (void) {
             current[p.first] = Pair(-1, -1);
           }
 
-          runner = first;
-          while (runner != last) {
-            unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
-            result.insert(value);
-            runner = current[runner].second;
+          for (auto & update : updated) {
+              unsigned long value = (static_cast<unsigned long>(current[update].first) << 32) + update;
+              result.insert(value);
           }
+          updated.clear();
         }
 
 
@@ -124,7 +131,6 @@ int main (void) {
         current[runner].first = s.server_id;
         first = runner = s.server_id;
 
-//        updated.push_back(s.server_id);
       } else {
         while (current[runner].second != -1 && current[runner].second < s.server_id) {
           runner = current[runner].second;
@@ -162,27 +168,35 @@ int main (void) {
       while (!queue.empty() && queue.top().second == last_time) {
         auto p = queue.top();
         queue.pop();
-        //          updated.push_back(p.first);
+
         if (last == p.first) {
           last = current[p.first].first;
+          if (updated.back() == p.first) {
+            updated.pop_back();
+          }
         } else {
           current[current[p.first].second].first = current[p.first].first;
+          if (first != p.first) {
+            if (updated.back() == p.first) {
+              updated.back() = current[p.first].second;
+            } else {
+              updated.push_back(current[p.first].second);
+            }
+          }
         }
         if (first == p.first) {
           first = current[p.first].second;
         } else {
           current[current[p.first].first].second = current[p.first].second;
         }
-//        current[p.first] = Pair(-1, -1);
+        current[p.first] = Pair(-1, -1);
       }
-      runner = first;
 
-      while (runner != last) {
-        unsigned long value = (static_cast<unsigned long>(runner) << 32) + current[runner].second;
+      for (auto & update : updated) {
+        unsigned long value = (static_cast<unsigned long>(current[update].first) << 32) + update;
         result.insert(value);
-        runner = current[runner].second;
       }
-//        result.insert((slots[i].server_id << 32) +  slots[i+1].server_id);
+      updated.clear();
     }
 
     vector<Pair> sorted_result(result.size());
