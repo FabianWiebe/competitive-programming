@@ -4,9 +4,139 @@
 #include <algorithm>
 #include <unordered_set>
 #include <queue>
-#include <<cstdlib>>
+#include <cstdlib>
 
 using namespace std;
+
+struct Node {
+    Node(size_t val) : value(val), _rand(rand()){
+    }
+    int find (size_t val) {
+      if (value >= val) {
+        if (!left) {
+          return -1;
+        }
+        return left->find(val);
+      } else {
+        if (!right) {
+          return val;
+        } else {
+          int tmp = right->find(val);
+          if (tmp == -1) {
+            return value;
+          } else {
+            return tmp;
+          }
+        }
+      }
+    }
+    size_t value;
+    int _rand;
+    Node* left = nullptr;
+    Node* right = nullptr;
+    Node* add_node(size_t val) {
+        if (val <= value) {
+          if (left) {
+            left = left->add_node(val);
+          } else {
+            left = new Node(val);
+          }
+          if (left->_rand < _rand) {
+            Node* n = right_rotate();
+            return n;
+          }
+        } else {
+          if (right) {
+            right = right->add_node(val);
+          } else {
+            right = new Node(val);
+          }
+          if(right->_rand < _rand) {
+            Node* n = left_rotate();
+            return n;
+          }
+        }
+        return this;
+    }
+    Node* right_rotate()
+    {
+      Node* n = left;
+      left = n->right;
+      n->right = this;
+      return n;
+    }
+    Node* left_rotate()
+    {
+      Node* n = right;
+      right = n->left;
+      n->left = this;
+      return n;
+    }
+    Node* remove(size_t val) {
+      if (val < value) {
+        left = left->remove(val);
+      } else if (val > value) {
+        right = right->remove(val);
+      } else {
+        if (!left || !right) {
+          if (left) {
+            return left;
+          } else if (right) {
+            return right;
+          }
+//          delete this;
+          return nullptr;
+        } else {
+          if (left->_rand < right->_rand) {
+            Node *n = right_rotate();
+            n->right->remove(val);
+            return n;
+          } else {
+            Node *n = left_rotate();
+            n->left->remove(val);
+            return n;
+          }
+        }
+      }
+      return this;
+    }
+    void delete_tree() {
+      if (left) {
+        left->delete_tree();
+        delete left;
+      }
+      if (right) {
+        right->delete_tree();
+        delete right;
+      }
+    }
+};
+
+struct Tree{
+    Tree() {
+
+    }
+    ~Tree() {
+      if (root) {
+        root->delete_tree();
+        delete root;
+      }
+    }
+    void remove(size_t val) {
+      root = root->remove(val);
+    }
+
+    int add(size_t val) {
+      if (!root) {
+        root = new Node{val};
+        return -1;
+      } else {
+        root = root->add_node(val);
+      }
+      return root->find(val);
+    }
+    Node* root = nullptr;
+};
 
 using my_pair_t = std::pair<size_t, size_t>;
 
@@ -23,14 +153,15 @@ using Pair = pair<int, int>;
 int main (void) {
 	std::ios::sync_with_stdio(false);
   std::cin.tie(NULL);
-//	 std::ifstream in("largeSample.in");
-//	 std::cin.rdbuf(in.rdbuf());
+	 std::ifstream in("largeSample.in");
+	 std::cin.rdbuf(in.rdbuf());
 	int total_number;
 	std::cin >> total_number;
   vector<Slot> slots;
   unordered_set<unsigned long> result;
   vector<Pair> current;
 	while (--total_number >= 0) {
+    Tree t;
     result.clear();
     size_t server_no, timeslot_no;
     cin >> server_no >> timeslot_no;
@@ -67,7 +198,7 @@ int main (void) {
 
     int first = -1;
     int last = -1;
-    int runner = first;
+//    int runner = first;
 
     vector<size_t> updated;
     for (auto & s : slots) {
@@ -89,18 +220,19 @@ int main (void) {
           while (!queue.empty() && queue.top().second == last_time) {
             auto p = queue.top();
             queue.pop();
+            t.remove(p.first);
             if (last == p.first) {
               last = current[p.first].first;
-              if (updated.back() == p.first) {
+              if (!updated.empty() && updated.back() == p.first) {
                 updated.pop_back();
               }
             } else {
               current[current[p.first].second].first = current[p.first].first;
               if (first != p.first) {
-                if (updated.back() == p.first) {
+                if (!updated.empty() && updated.back() == p.first) {
                   updated.back() = current[p.first].second;
                 } else {
-                  updated.push_back(current[p.first].second);
+                  updated.emplace_back(current[p.first].second);
                 }
               }
             }
@@ -120,33 +252,52 @@ int main (void) {
         }
 
 
-        runner = first;
+//        runner = first;
       }
       current_time = s.start;
       queue.emplace(s.server_id, s.end);
-      if (runner == -1) {
-        first = last = runner = s.server_id;
-      } else if (runner > s.server_id) {
-        current[s.server_id] = Pair{-1, runner};
-        current[runner].first = s.server_id;
-        first = runner = s.server_id;
-
-      } else {
-        while (current[runner].second != -1 && current[runner].second < s.server_id) {
-          runner = current[runner].second;
-        }
-        if (current[runner].second == -1) {
-          current[s.server_id] = Pair{runner, -1};
-          current[runner].second = s.server_id;
-          last = s.server_id;
-        } else {
-          current[s.server_id] = Pair{runner, current[runner].second};
-          current[current[runner].second].first = s.server_id;
-          current[runner].second = s.server_id;
-        }
-        runner = s.server_id;
-
+      if (s.server_id == 9177) {
+        cout << "";
       }
+      int _res = t.add(s.server_id);
+      if (first == -1) {
+        first = last = s.server_id;
+      } else if (_res == -1) {
+        current[first].first = s.server_id;
+        current[s.server_id] = Pair{-1, first};
+        first = s.server_id;
+      } else if (last == _res) {
+          current[s.server_id] = Pair{_res, -1};
+          current[_res].second = s.server_id;
+          last = s.server_id;
+      } else {
+        current[s.server_id] = Pair{_res, current[_res].second};
+        current[current[_res].second].first = s.server_id;
+        current[_res].second = s.server_id;
+      }
+//      if (runner == -1) {
+//        first = last = runner = s.server_id;
+//      } else if (runner > s.server_id) {
+//        current[s.server_id] = Pair{-1, runner};
+//        current[runner].first = s.server_id;
+//        first = runner = s.server_id;
+//
+//      } else {
+//        while (current[runner].second != -1 && current[runner].second < s.server_id) {
+//          runner = current[runner].second;
+//        }
+//        if (current[runner].second == -1) {
+//          current[s.server_id] = Pair{runner, -1};
+//          current[runner].second = s.server_id;
+//          last = s.server_id;
+//        } else {
+//          current[s.server_id] = Pair{runner, current[runner].second};
+//          current[current[runner].second].first = s.server_id;
+//          current[runner].second = s.server_id;
+//        }
+//        runner = s.server_id;
+//
+//      }
       updated.push_back(s.server_id);
     }
 
@@ -168,19 +319,20 @@ int main (void) {
       while (!queue.empty() && queue.top().second == last_time) {
         auto p = queue.top();
         queue.pop();
+        t.remove(p.first);
 
         if (last == p.first) {
           last = current[p.first].first;
-          if (updated.back() == p.first) {
+          if (!updated.empty() && updated.back() == p.first) {
             updated.pop_back();
           }
         } else {
           current[current[p.first].second].first = current[p.first].first;
           if (first != p.first) {
-            if (updated.back() == p.first) {
+            if (!updated.empty() && updated.back() == p.first) {
               updated.back() = current[p.first].second;
             } else {
-              updated.push_back(current[p.first].second);
+              updated.emplace_back(current[p.first].second);
             }
           }
         }
@@ -191,8 +343,8 @@ int main (void) {
         }
         current[p.first] = Pair(-1, -1);
       }
-
-      for (auto & update : updated) {
+//      cerr << updated.size();
+      for (auto update : updated) {
         unsigned long value = (static_cast<unsigned long>(current[update].first) << 32) + update;
         result.insert(value);
       }
