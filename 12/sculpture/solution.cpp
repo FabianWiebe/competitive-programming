@@ -47,24 +47,24 @@ using namespace std;
 //};
 //
 //using entry = Entry<int>;
-using Pair = pair<int, int>;
+using Pair = pair<size_t, size_t>;
 
 int main (void) {
 //	std::ios::sync_with_stdio(false);
 //  std::cin.tie(NULL);
-//	 std::ifstream in("largeSample.in");
+//	 std::ifstream in("sample.in");
 //	 std::cin.rdbuf(in.rdbuf());
 	int total_number;
 	std::cin >> total_number;
-  vector<int> al[51];
-  int counter[51][51];
+  vector<size_t> al[51];
+  size_t counter[51][51];
 //  entry* uf[51];
-  int next[51];
-  int case_counter = 0;
-  int first_al = 0;
-  int last_al = 51;
+  size_t next[51];
+  size_t case_counter = 0;
+  size_t first_al = 0;
+  size_t last_al = 51;
 	while (--total_number >= 0) {
-    int no_trusses;
+    size_t no_trusses;
 		std::cin >> no_trusses;
     for (auto & list : al) {
       list.clear();
@@ -78,9 +78,9 @@ int main (void) {
 //      uf[i] = new entry(i);
 //    }
     first_al = 51;
-    last_al = -1;
+    last_al = 0;
     for (size_t i = 0; i < no_trusses; ++i) {
-      int first, second;
+      size_t first, second;
       cin >> first >> second;
 //      --first;
 //      --second;
@@ -107,17 +107,17 @@ int main (void) {
     if (possible) {
       vector<Pair> out;
       out.reserve(no_trusses);
-      int last = first_al;
+      size_t last = first_al;
       while (out.size() < no_trusses) {
-        int tmp_next = next[last];
-        int tmp_next_val = al[last][tmp_next];
+        size_t tmp_next = next[last];
+        size_t tmp_next_val = al[last][tmp_next];
         while (tmp_next < al[last].size() && (counter[min(last, tmp_next_val)][max(last, tmp_next_val)] == 0)) {
           ++tmp_next;
           tmp_next_val = al[last][tmp_next];
         }
         if (tmp_next >= al[last].size()) {
           // reorder
-          int first_ind;
+          size_t first_ind;
           next[last] = tmp_next;
           bool found = false;
           for (first_ind = 1; first_ind < out.size(); ++first_ind) {
