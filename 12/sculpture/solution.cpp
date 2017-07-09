@@ -5,48 +5,6 @@
 
 using namespace std;
 
-//template <typename T>
-//struct Entry {
-//    Entry(T v, Entry<T> * p = nullptr) : value(std::move(v)), nodes(1u), parent(p), is_root(true) {
-//      if (!parent) {
-//        this->parent = this;
-//      } else {
-//        ++(this->parent->nodes);
-//        this->is_root = false;
-//      }
-//    }
-//    T value;
-//    size_t nodes;
-//    Entry<T> * parent;
-//    bool is_root;
-//    Entry<T> * get_representative() {
-//      if (this->is_root) {
-//        return this;
-//      }
-//      return this->parent = this->parent->get_representative();
-//    }
-//    inline bool is_in_same_set(Entry<T> * e) {
-//      return this->get_representative() == e->get_representative();
-//    }
-//    inline bool merge (Entry<T> * e) {
-//      if (this->is_in_same_set(e)) {
-//        return false;
-//      }
-//      // parent = get_representative()
-//      if (e->parent->nodes > this->parent->nodes) {
-//        e->parent->nodes += this->parent->nodes;
-//        this->parent->is_root = false;
-//        this->parent->parent = e->parent;
-//      } else {
-//        this->parent->nodes += e->parent->nodes;
-//        e->parent->is_root = false;
-//        e->parent->parent = this->parent;
-//      }
-//      return true;
-//    }
-//};
-//
-//using entry = Entry<int>;
 using Pair = pair<size_t, size_t>;
 
 int main (void) {
@@ -58,7 +16,6 @@ int main (void) {
 	std::cin >> total_number;
   vector<size_t> al[51];
   size_t counter[51][51];
-//  entry* uf[51];
   size_t next[51];
   size_t case_counter = 0;
   size_t first_al = 0;
@@ -74,19 +31,13 @@ int main (void) {
         counter[i][j] = 0;
       }
     }
-//    for (size_t i = 0; i < 51; ++i) {
-//      uf[i] = new entry(i);
-//    }
     first_al = 51;
     last_al = 0;
     for (size_t i = 0; i < no_trusses; ++i) {
       size_t first, second;
       cin >> first >> second;
-//      --first;
-//      --second;
       al[first].push_back(second);
       al[second].push_back(first);
-//      uf[first]->merge(uf[second]);
       ++counter[min(first, second)][max(first, second)];
       first_al = min(min(first, second), first_al);
       last_al = max(max(first, second), last_al);
@@ -94,9 +45,8 @@ int main (void) {
 
     bool possible = true;
 
-//    entry * representative = uf[first_al]->get_representative();
     for (size_t i = first_al; i <= last_al; ++i) {
-      if (al[i].size() % 2 == 1) { //  || (!al[i].empty() && uf[i]->get_representative() != representative)
+      if (al[i].size() % 2 == 1) {
         possible = false;
         break;
       }
@@ -154,10 +104,6 @@ int main (void) {
 //      cerr << "some trusses may be lost" << '\n';
     }
     cout << endl;
-//    cerr << '\n';
-//    for (auto ptr : uf) {
-//      delete ptr;
-//    }
 	}
 	return 0;
 }
