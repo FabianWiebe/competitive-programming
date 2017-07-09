@@ -109,16 +109,14 @@ int main (void) {
       out.reserve(no_trusses);
       size_t last = first_al;
       while (out.size() < no_trusses) {
-        size_t tmp_next = next[last];
-        size_t tmp_next_val = al[last][tmp_next];
-        while (tmp_next < al[last].size() && (counter[min(last, tmp_next_val)][max(last, tmp_next_val)] == 0)) {
-          ++tmp_next;
-          tmp_next_val = al[last][tmp_next];
+        size_t tmp_next_val = al[last][next[last]];
+        while (next[last] < al[last].size() && (counter[min(last, tmp_next_val)][max(last, tmp_next_val)] == 0)) {
+          ++next[last];
+          tmp_next_val = al[last][next[last]];
         }
-        if (tmp_next >= al[last].size()) {
+        if (next[last] >= al[last].size()) {
           // reorder
           size_t first_ind;
-          next[last] = tmp_next;
           bool found = false;
           for (first_ind = 1; first_ind < out.size(); ++first_ind) {
             if (next[out[first_ind].first] < al[out[first_ind].first].size()) {
@@ -139,8 +137,8 @@ int main (void) {
           // insert
           out.emplace_back(last, tmp_next_val);
           --counter[min(last, tmp_next_val)][max(last, tmp_next_val)];
-          next[last] = tmp_next + 1;
-          last = al[last][tmp_next];
+          ++next[last];
+          last = tmp_next_val;
         }
       }
       if (possible) {
