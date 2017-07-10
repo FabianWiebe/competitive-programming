@@ -35,19 +35,19 @@ int main (void) {
 	}
   vector<int> projects(project_no, 0);
   vector<int> next_students;
-//  next_students.reserve(student_no);
-//  for (size_t i = 0; i < priorities; ++i) {
-//    next_students.clear();
-//    for (auto student_id : current_students) {
-//      if (projects[prios[student_id][i]] < no_students_pre_project) {
-//        ++projects[prios[student_id][i]];
-//        student_projects[student_id] = prios[student_id][i];
-//      } else {
-//        next_students.push_back(student_id);
-//      }
-//    }
-//    current_students = next_students;
-//  }
+  next_students.reserve(student_no);
+  for (size_t i = 0; i < priorities; ++i) {
+    next_students.clear();
+    for (auto student_id : current_students) {
+      if (projects[prios[student_id][i]] < no_students_pre_project) {
+        ++projects[prios[student_id][i]];
+        student_projects[student_id] = prios[student_id][i];
+      } else {
+        next_students.push_back(student_id);
+      }
+    }
+    current_students = next_students;
+  }
   int current_project_id = 0;
   for (auto student_id : current_students) {
     while(projects[current_project_id] == no_students_pre_project) {
