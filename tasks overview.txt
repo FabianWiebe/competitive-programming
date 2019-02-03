@@ -25,8 +25,25 @@
 8
 - Garden: Berechnung aller kürzester Pfade
 - pokerchips: rekursiv mit dyn prog
-- students: 
+- students: find students groups with asking (not correct)
 
 9
 - atlas: dyn prog
-- destructive art: not working
+- destructive art: convex hull
+- umbridgerules: find shortest path - not working
+- server: save servers in lists to find which are running at same time
+
+11
+- dhl: recursive find of best solution
+
+12
+- bachelorprojects: min cost
+- picture: merge sort with count
+- sculpture: cycle with all nodes
+
+13
+- summit: max flow
+- collecting: all permutations
+
+14
+- ritual: find in 2d grid
